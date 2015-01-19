@@ -29,7 +29,9 @@ Dependencies
 
 ## Examples
 
-example.html
+Clone all files of saiku_utils.js repository into "/biserver-ce/tomcat/webapps/pentaho/test" folder. Then, open the url "http://localhost:8080/pentaho/test/saiku_utils.js/example.html".
+
+Attention: The example above is based on Pentaho 'SteelWheels' schema.
 
 ## Keywords
 
