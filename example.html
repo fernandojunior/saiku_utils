@@ -1,0 +1,35 @@
+<html>
+<head>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script type="text/javascript" src="https://raw.githubusercontent.com/fernandojunior/prototype_class.js/v1.0.0/prototype_class.min.js"></script>
+  <script type="text/javascript" src="saiku_utils.js"></script>
+  <script type="text/javascript">
+
+    function initialize () {
+	
+        SaikuUtils.create('http://localhost:8080/pentaho/plugin/saiku/api/').execute({
+            username: 'admin',
+            cube: {
+                schemaName: 'SteelWheels',
+                name: 'SteelWheelsSales',
+            },
+            queryname: 'query123',
+            open: true, // open new query cursor
+            mdx: 'SELECT NON EMPTY {Hierarchize({[Measures].[Quantity]})} ON COLUMNS, NON EMPTY {Hierarchize({[Product].[Product].Members})} ON ROWS FROM [SteelWheelsSales]',
+            mimetype: 'csv', // or json, pdf. Default == json
+            success: function (data) {
+                console.log('MDX was executed: ');
+                console.log(data);
+                $('#content').html(data);
+            },
+        });
+
+    };
+
+  </script>
+
+</head>
+<body onload="initialize()">
+</body>
+<div id="content"></div>
+</html>
