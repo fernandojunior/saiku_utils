@@ -1,4 +1,4 @@
-Copyright (c) 2015 Fernando Felix do Nascimento Junior
+// Copyright (c) 2014-2015 Fernando Felix do Nascimento Junior
 //needs prototype_class.min.js (https://github.com/fernandojunior/prototype_class.js) and jquery 
 var SaikuUtils = Class.simple_extend({
 	
