@@ -14,9 +14,9 @@
                 name: 'SteelWheelsSales',
             },
             queryname: 'query123',
-            open: true, // open new query cursor
+            open: true, // open new query cursor. Default == false
             mdx: 'SELECT NON EMPTY {Hierarchize({[Measures].[Quantity]})} ON COLUMNS, NON EMPTY {Hierarchize({[Product].[Product].Members})} ON ROWS FROM [SteelWheelsSales]',
-            mimetype: 'csv', // or json, pdf. Default == json
+            mimetype: 'csv', // json, xls, pdf. Default == json
             success: function (data) {
                 console.log('MDX was executed: ');
                 console.log(data);
