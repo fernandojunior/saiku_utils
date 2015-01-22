@@ -1,14 +1,45 @@
 // Copyright (c) 2014-2015 Fernando Felix do Nascimento Junior
-//needs prototype_class.min.js (https://github.com/fernandojunior/prototype_class.js) and jquery 
+
+/**
+ * Some Saiku Utilities. 
+ * It needs prototype_class.min.js 1.0.0 (https://github.com/fernandojunior/prototype_class.js) and jQuery.
+ **/
 var SaikuUtils = Class.simple_extend({
 	
+        /**
+	 * Build a new SaikuUtils object.
+	 * 
+	 * @param conf.rootpath The root path of Saiku Rest API. Default == '/pentaho/plugin/saiku/api/'
+	 * @param conf.cube (optional) The default cube object.
+	 * @param conf.cube.name The name of the cube
+	 * @param conf.cube.schemaName The name of the schema
+	 * @param conf.cube.catalog (optional) The name of the catalog. Default == conf.cube.schemaName
+	 * @param conf.cube.connection (optional) The name of the connection. Default == conf.cube.schemaName
+	 * @param conf.username (optional) The default name of the user.
+         **/
 	constructor: function (rootpath, username, cube) {
 		this.rootpath = rootpath || '/pentaho/plugin/saiku/api/';
 		this.username = username;
-		this.cube = cube;
+		this.cube = cube || {
+			schemaName: undefined,
+			name: undefined
+                };
 	},
 	
-	// creates a query
+        /**
+	 * Create a new Saiku Query. Method: POST. Path: "{username}/query/{queryname}". 
+	 * Observation: Saiku Query concept is similar to sql cursor.
+	 * 
+	 * @param conf.error The error callback
+	 * @param conf.queryname The name of the new query
+	 * @param conf.success The success callback
+	 * @param conf.cube (optional) The cube object. Default == this.cube
+	 * @param conf.cube.name The name of the cube
+	 * @param conf.cube.schemaName The name of the schema
+	 * @param conf.cube.catalog (optional) The name of the catalog. Default == conf.cube.schemaName
+	 * @param conf.cube.connection (optional) The name of the connection. Default == conf.cube.schemaName
+	 * @param conf.username (optional) The name of the user. Default == this.username
+         **/
 	open: function (conf) {
 		var username = conf.username || this.username;
 		var queryname = conf.queryname;
@@ -34,7 +65,23 @@ var SaikuUtils = Class.simple_extend({
 		
 	},
 	
-	// executes a mdx over a query
+        /**
+	 * Execute a MDX analysis. Method: POST. Path: "{username}/query/{queryname}/result".
+	 * Observation: MDX analysis is similar to sql query.
+	 * 
+	 * @param conf.error The error callback
+	 * @param conf.mdx The mdx analysis to be executed
+	 * @param conf.queryname The name of the new query
+	 * @param conf.success The success callback
+	 * @param conf.cube (optional) The cube object. Default == this.cube
+	 * @param conf.cube.name The name of the cube
+	 * @param conf.cube.schemaName The name of the schema
+	 * @param conf.cube.catalog (optional) The name of the catalog. Default == conf.cube.schemaName
+	 * @param conf.cube.connection (optional) The name of the connection. Default == conf.cube.schemaName
+	 * @param conf.mimetype (optional) The type of mdx analysis data. Default == json
+	 * @param conf.open (optional) A flag to indicate if a new query to the mdx analysis must be created or not. Default == false
+	 * @param conf.username (optional) The name of the user. Default == this.username
+         **/
 	execute: function (conf) {
 		var username = conf.username || this.username;
 		var queryname = conf.queryname;
@@ -47,13 +94,14 @@ var SaikuUtils = Class.simple_extend({
 		
 		var self = this;
 		
+		// creating new query
 		if (open == true)
 			return self.open({
 				username: username,
 				queryname: queryname,
 				cube: cube,
 				success: function (data) {
-					delete conf['cube']; // conf eh uma variavel por referencia, portanto, deve-se copiar conf
+					delete conf['cube']; // bug: conf eh um parametro por referencia, portanto, deve-se copiar conf e entao deletar a chave do objeto copiado
 					delete conf['open'];
 					self.execute(conf);
 				},
@@ -81,6 +129,15 @@ var SaikuUtils = Class.simple_extend({
 		
 	},
 	
+        /**
+	 * Export a query. Method: GET. Path: "{username}/query/{queryname}/export/{mimetype}".
+	 * 
+	 * @param conf.error The error callback
+	 * @param conf.queryname The name of the new query
+	 * @param conf.success The success callback
+	 * @param conf.mimetype (optional) The type of mdx analysis data. Default == 'json'
+	 * @param conf.username (optional) The name of the user. Default == this.username
+         **/
 	export: function (conf) {		
 		var username = conf.username || this.username;
 		var queryname = conf.queryname;
@@ -104,40 +161,3 @@ var SaikuUtils = Class.simple_extend({
 	
 		
 });
-
-// export from query return this.saiku.rootpath + this.saiku.username + "/query/" + this.queryname + "/export/" + mimetype;
-
-// export from file /pentaho/plugin/saiku/api/admin/export/saiku/xls?file=/home/admin/002.saiku
-
-// create saiku analysis file
-
-//POST
-//
-//http://localhost:8080/pentaho/plugin/saiku/api/admin/repository/resource
-//
-//name=/public/test2.saiku&file=/public/test2.saiku&content=<?xml version="1.0" encoding="UTF-8"?>
-//<Query name="2AA5BBD2-C15D-A675-BA74-C204266B5E20" type="MDX" connection="MYSQL_TEST" cube="[Pedidos]" catalog="MYSQL_TEST" schema="MYSQL_TEST">
-//  <MDX>SELECT
-//NON EMPTY {Hierarchize({[Measures].[Volume Vendas]})} ON COLUMNS,
-//NON EMPTY {Hierarchize({[Cliente].[Cliente].Members})} ON ROWS
-//FROM [Pedidos]</MDX>
-//  <Totals />
-//  <Properties>
-//    <Property name="saiku.olap.query.nonempty" value="true" />
-//    <Property name="saiku.olap.query.nonempty.rows" value="true" />
-//    <Property name="org.saiku.query.explain" value="true" />
-//    <Property name="org.saiku.connection.scenario" value="false" />
-//    <Property name="saiku.ui.render.mode" value="table" />
-//    <Property name="saiku.olap.query.nonempty.columns" value="true" />
-//    <Property name="saiku.olap.query.drillthrough" value="true" />
-//    <Property name="saiku.olap.query.automatic_execution" value="true" />
-//  </Properties>
-//</Query>
-
-// js/saiku/models/Repository.js
-
-// var mq = new Query({ xml: '<Query name="C25E54AB-780D-AA9D-BCA8-260C267EE787" type="QM" connection="MYSQL_TEST" cube="[Pedidos]" catalog="MYSQL_TEST" schema="MYSQL_TEST"> <QueryModel> <Axes> <Axis location="ROWS" nonEmpty="true"> <Dimensions> <Dimension name="Filial" hierarchizeMode="PRE" hierarchyConsistent="true"> <Inclusions> <Selection dimension="Filial" type="level" node="[Filial].[Filial (Codigo)]" operator="MEMBERS" /> </Inclusions> <Exclusions /> </Dimension> </Dimensions> </Axis> <Axis location="COLUMNS" nonEmpty="true"> <Dimensions> <Dimension name="Measures" hierarchizeMode="PRE" hierarchyConsistent="true"> <Inclusions> <Selection dimension="Measures" type="member" node="[Measures].[Volume Vendas]" operator="MEMBER" /> </Inclusions> <Exclusions /> </Dimension> </Dimensions> </Axis> <Axis location="FILTER" nonEmpty="false" /> </Axes> </QueryModel> <MDX>SELECT NON EMPTY {Hierarchize({[Measures].[Volume Vendas]})} ON COLUMNS, NON EMPTY {Hierarchize({[Filial].[Filial (Codigo)].Members})} ON ROWS FROM [Pedidos]</MDX> <Totals /> <Properties> <Property name="saiku.ui.render.mode" value="table" /> <Property name="org.saiku.query.explain" value="true" /> <Property name="saiku.olap.query.nonempty.columns" value="true" /> <Property name="saiku.olap.query.nonempty.rows" value="true" /> <Property name="org.saiku.connection.scenario" value="false" /> <Property name="saiku.olap.query.automatic_execution" value="true" /> <Property name="saiku.olap.query.drillthrough" value="true" /> <Property name="saiku.olap.query.filter" value="true" /> <Property name="saiku.olap.query.limit" value="true" /> <Property name="saiku.olap.query.nonempty" value="true" /> </Properties> </Query>', formatter: Settings.CELLSET_FORMATTER}, { name: 'testaa'});
-// var tab = Saiku.tabs.add(new Workspace({ query: mq }));
-
-//var mq = new Query({ xml: '<Query name="C25E54AB-780D-AA9D-BCA8-260C267EE787" type="MDX" connection="MYSQL_TEST" cube="[Pedidos]" catalog="MYSQL_TEST" schema="MYSQL_TEST"> <MDX>SELECT NON EMPTY {Hierarchize({[Measures].[Volume Vendas]})} ON COLUMNS, NON EMPTY {Hierarchize({[Filial].[Filial (Codigo)].Members})} ON ROWS FROM [Pedidos]</MDX> <Totals /> <Properties> <Property name="saiku.ui.render.mode" value="table" /> <Property name="org.saiku.query.explain" value="true" /> <Property name="saiku.olap.query.nonempty.columns" value="true" /> <Property name="saiku.olap.query.nonempty.rows" value="true" /> <Property name="org.saiku.connection.scenario" value="false" /> <Property name="saiku.olap.query.automatic_execution" value="true" /> <Property name="saiku.olap.query.drillthrough" value="true" /> <Property name="saiku.olap.query.filter" value="true" /> <Property name="saiku.olap.query.limit" value="true" /> <Property name="saiku.olap.query.nonempty" value="true" /> </Properties> </Query>', formatter: Settings.CELLSET_FORMATTER}, { name: 'testaa'});
-//var tab = Saiku.tabs.add(new Workspace({ query: mq }));
